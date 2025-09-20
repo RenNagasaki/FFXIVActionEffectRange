@@ -19,7 +19,7 @@ such as where has the action landed and how large an area it covered.
 
 [XIVLauncher](https://github.com/goatcorp/FFXIVQuickLauncher) is required to install and run the plugin.
 
-Add my [Dalamud plugin repo](https://github.com/yomishino/MyDalamudPlugins) to Dalamud's Custom Plugin Repositories.
+Add my [https://raw.githubusercontent.com/RenNagasaki/MyDalamudPlugins/master/pluginmaster.json](https://raw.githubusercontent.com/RenNagasaki/MyDalamudPlugins/master/pluginmaster.json) to Dalamud's Custom Plugin Repositories.
 
 Once added, look for the plugin "ActionEffectRange" in Plugin Installer's available plugins.
 
