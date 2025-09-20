@@ -2,7 +2,7 @@
 using ActionEffectRange.Actions.Data.Template;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace ActionEffectRange.UI
 {
@@ -72,7 +72,7 @@ namespace ActionEffectRange.UI
             if (selectedMatchedActionRow != null)
             {
                 ImGui.Text("Editing for action: " +
-                    ActionDataInterfacing.GetActionDescription(selectedMatchedActionRow));
+                    ActionDataInterfacing.GetActionDescription(selectedMatchedActionRow.Value));
                 ImGui.Indent();
                 ImGuiExt.InputIntWithTooltip("Central angle: ", 
                     ref centralAngleDegInput, 1, 10, 0, 360, 
@@ -83,7 +83,7 @@ namespace ActionEffectRange.UI
 
                 if (ImGuiExt.IconButton(1, FontAwesomeIcon.Plus, "Add to the list"))
                 {
-                    ActionData.AddToConeAoEAngleList(selectedMatchedActionRow.RowId,
+                    ActionData.AddToConeAoEAngleList(selectedMatchedActionRow.Value.RowId,
                         ActionDataInterfacing.DegToCycle(centralAngleDegInput),
                         ActionDataInterfacing.DegToRad(rotationOffsetDegInput));
                     ClearEditInput();

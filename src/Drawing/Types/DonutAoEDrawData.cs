@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+﻿using Dalamud.Bindings.ImGui;
 
 namespace ActionEffectRange.Drawing.Types
 {
@@ -28,21 +28,14 @@ namespace ActionEffectRange.Drawing.Types
 
             for (int i = 0; i < Config.NumSegments; i++)
             {
-                Projection.WorldToScreen(
-                    new(Centre.X + Radius * MathF.Sin(i * seg),
-                        Centre.Y,
-                        Centre.Z + Radius * MathF.Cos(i * seg)),
-                    out var pOuter, out var prOuter);
-                // Don't add points that may be projected to weird positions
-                outerPoints[i] = prOuter.Z < -.5f 
-                    ? new(float.NaN, float.NaN) : pOuter;
-                Projection.WorldToScreen(
-                    new(Centre.X + InnerRadius * MathF.Sin(i * seg),
-                        Centre.Y,
-                        Centre.Z + InnerRadius * MathF.Cos(i * seg)),
-                    out var pInner, out var prInner);
-                innerPoints[i] = prInner.Z < -.5f 
-                    ? new(float.NaN, float.NaN) : pInner;
+                camera.WorldToScreen(new(Centre.X + Radius * MathF.Sin(i * seg),
+                    Centre.Y,
+                    Centre.Z + Radius * MathF.Cos(i * seg)), out var pOuter);
+                outerPoints[i] = pOuter;
+                camera.WorldToScreen(new(Centre.X + InnerRadius * MathF.Sin(i * seg),
+                    Centre.Y,
+                    Centre.Z + InnerRadius * MathF.Cos(i * seg)), out var pInner);
+                innerPoints[i] = pInner;
             }
 
             if (Config.Filled 

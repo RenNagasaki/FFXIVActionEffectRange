@@ -3,27 +3,21 @@ using ActionEffectRange.Actions.Enums;
 using System.Collections.Generic;
 using System.Linq;
 
-using ExcSheets = Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace ActionEffectRange.UI
 {
     public static class ActionDataInterfacing
     {
-        public static IEnumerable<ExcSheets.Action>? GetAllPartialMatchActionExcelRows(
-            string input, bool alsoMatchId, int maxCount, 
-            bool playerCombatActionOnly, Func<ExcSheets.Action, bool>? filter)
-            => ActionData.ActionExcelSheet?.Where(row => row != null
-                && (row.Name.RawString.Contains(input, 
-                        StringComparison.CurrentCultureIgnoreCase)
-                    || alsoMatchId && row.RowId.ToString().Contains(input))
-                && (!playerCombatActionOnly || ActionData.IsPlayerCombatAction(row)) 
-                && (filter == null || filter(row)))
-            .Take(maxCount);
+        public static IEnumerable<Lumina.Excel.Sheets.Action> GetAllPartialMatchActionExcelRows(string input, bool alsoMatchId, int maxCount, bool playerCombatActionOnly, Func<Lumina.Excel.Sheets.Action, bool> filter)
+            => ActionData.ActionExcelSheet?
+                .Where(row => (row.Name.ToString().Contains(input, StringComparison.CurrentCultureIgnoreCase) || alsoMatchId && row.RowId.ToString().Contains(input)) && (!playerCombatActionOnly || ActionData.IsPlayerCombatAction(row)) && filter(row))
+                .Take(maxCount) ?? [];
 
-        public static string GetActionDescription(ExcSheets.Action row)
+        public static string GetActionDescription(Lumina.Excel.Sheets.Action row)
         {
             var classjobRow = row.ClassJob.Value;
-            var classjob = classjobRow != null && classjobRow.RowId > 0
+            var classjob = classjobRow.RowId > 0
                 ? $" [{classjobRow.Abbreviation}]" : string.Empty;
             var pvp = row.IsPvP ? " [PvP]" : string.Empty;
             return $"#{row.RowId} {row.Name}{classjob}{pvp}";

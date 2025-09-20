@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using Dalamud.Bindings.ImGui;
+using FFXIVClientStructs.FFXIV.Client.Game.Control;
 
 namespace ActionEffectRange.Drawing.Types
 {
@@ -26,7 +27,7 @@ namespace ActionEffectRange.Drawing.Types
             CentralAngleCycles = centralAngleCycles;
         }
 
-        private void DrawHalfCone(ImDrawListPtr drawList, Vector2 projectedOrigin, 
+        private unsafe void DrawHalfCone(ImDrawListPtr drawList, Vector2 projectedOrigin, 
             Vector2 projectedEnd, int numSegments, bool drawClockwise)
         {
             var points = new Vector2[numSegments];
@@ -39,19 +40,9 @@ namespace ActionEffectRange.Drawing.Types
             {
                 var a = drawClockwise 
                     ? i * ArcSegmentAngle + rot : rot - i * ArcSegmentAngle;
-                Projection.WorldToScreen(
-                    new(Origin.X + Radius * MathF.Sin(a), Origin.Y, 
-                        Origin.Z + Radius * MathF.Cos(a)),
-                    out var p, out var pr);
-                // Don't draw the whole range if some of the points may be
-                //  projected to a weird position.
-                // We cannot simply ignore it like when we draw Circle AoE
-                //  because that may truncate part of the cone 
-                if (pr.Z < -1)
-                {
-                    drawList.PathClear();
-                    return;
-                }
+                camera.WorldToScreen(new(Origin.X + Radius * MathF.Sin(a), Origin.Y, 
+                    Origin.Z + Radius * MathF.Cos(a)), out var p);
+                
                 points[i] = p;
                 drawList.PathLineTo(p);
             }
@@ -73,10 +64,10 @@ namespace ActionEffectRange.Drawing.Types
             drawList.PathClear();
         }
 
-        public override void Draw(ImDrawListPtr drawList)
+        public override unsafe void Draw(ImDrawListPtr drawList)
         {
-            Projection.WorldToScreen(Origin, out var p0);
-            Projection.WorldToScreen(End, out var pe);
+            camera.WorldToScreen(Origin, out var p0);
+            camera.WorldToScreen(End, out var pe);
 #if DEBUG
             drawList.AddCircleFilled(pe, Config.Thickness * 2, RingColour);
 #endif      

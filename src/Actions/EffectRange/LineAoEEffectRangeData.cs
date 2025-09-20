@@ -19,8 +19,8 @@ namespace ActionEffectRange.Actions.EffectRange
         }
 
         public BidirectedLineAoEEffectRangeData(
-            Lumina.Excel.GeneratedSheets.Action actionRow, float rotationOffset = 0)
-            : this(actionRow.RowId, actionRow.ActionCategory.Row, actionRow.TargetArea,
+            Lumina.Excel.Sheets.Action actionRow, float rotationOffset = 0)
+            : this(actionRow.RowId, actionRow.ActionCategory.RowId, actionRow.TargetArea,
                   ActionData.GetActionHarmfulness(actionRow), actionRow.Range, 
                   actionRow.EffectRange, actionRow.XAxisModifier, actionRow.CastType, 
                   rotationOffset, isOriginal: true)

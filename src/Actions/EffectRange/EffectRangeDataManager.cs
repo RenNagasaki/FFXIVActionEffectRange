@@ -11,12 +11,12 @@ namespace ActionEffectRange.Actions
         public static EffectRangeData? NewData(uint actionId)
         {
             var row = ActionData.GetActionExcelRow(actionId);
-            return row == null ? null : NewData(row);
+            return row == null ? null : NewData(row.Value);
         }
 
         public static EffectRangeData NewData(
-            Lumina.Excel.GeneratedSheets.Action actionRow)
-            => EffectRangeData.Create(actionRow.RowId, actionRow.ActionCategory.Row,
+            Lumina.Excel.Sheets.Action actionRow)
+            => EffectRangeData.Create(actionRow.RowId, actionRow.ActionCategory.RowId,
                 actionRow.TargetArea, ActionData.GetActionHarmfulness(actionRow),
                 actionRow.Range, actionRow.EffectRange, actionRow.XAxisModifier,
                 actionRow.CastType, isOriginal: true);

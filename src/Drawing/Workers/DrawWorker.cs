@@ -1,6 +1,6 @@
 ﻿using ActionEffectRange.Actions.EffectRange;
 using ActionEffectRange.Actions.Enums;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System.Collections.Generic;
 
 namespace ActionEffectRange.Drawing.Workers

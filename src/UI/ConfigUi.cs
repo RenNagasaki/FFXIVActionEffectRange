@@ -1,5 +1,5 @@
 ﻿using ActionEffectRange.Actions.Data;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System.Diagnostics;
 
 namespace ActionEffectRange.UI
@@ -26,14 +26,14 @@ namespace ActionEffectRange.UI
             ImGui.SetNextWindowSize(new(500, 400), ImGuiCond.FirstUseEver);
             if (ImGui.Begin("ActionEffectRange: Configuration"))
             {
-                ImGui.TreePush();
+                ImGui.TreePush("");
                 ImGui.Checkbox("Enable plugin", ref Config.Enabled);
                 ImGui.TreePop();
 
                 if (Config.Enabled)
                 {
                     ImGui.NewLine();
-                    ImGui.TreePush();
+                    ImGui.TreePush("");
                     ImGui.Checkbox("Enable in PvP zones", ref Config.EnabledPvP);
                     ImGui.TreePop();
 
@@ -41,7 +41,7 @@ namespace ActionEffectRange.UI
 
                     ImGui.Text("Drawing Options");
                     ImGui.NewLine();
-                    ImGui.TreePush();
+                    ImGui.TreePush("");
                     ImGui.Columns(2, "DrawingOptions", false);
                     ImGuiExt.CheckboxWithTooltip("Enable for beneficial actions", 
                         ref Config.DrawBeneficial,
@@ -119,7 +119,7 @@ namespace ActionEffectRange.UI
 
                     ImGui.Text("Style options");
                     ImGui.NewLine();
-                    ImGui.TreePush();
+                    ImGui.TreePush("");
                     ImGui.Columns(2, "StyleOptions", false);
                     ImGui.Checkbox("Draw outline (outer ring)", ref Config.OuterRing);
                     if (Config.OuterRing)
@@ -149,7 +149,7 @@ namespace ActionEffectRange.UI
 
                     ImGuiExt.SpacedSeparator();
 
-                    ImGui.TreePush();
+                    ImGui.TreePush("");
                     ImGuiExt.DragFloatWithTooltip("Delay before drawing (sec): ", 
                         ref Config.DrawDelay, .1f, 0, 2, "%.3f", 80,
                         "Delay (in seconds) to wait immediately after using an action " +
@@ -162,7 +162,7 @@ namespace ActionEffectRange.UI
 
                     ImGuiExt.SpacedSeparator();
 
-                    ImGui.TreePush();
+                    ImGui.TreePush("");
                     ImGuiExt.CheckboxWithTooltip("Enable drawing during casting",
                         ref Config.DrawWhenCasting,
                         "If enabled, will also draw effect range when you are casting an AoE action.\n" +
@@ -190,7 +190,7 @@ namespace ActionEffectRange.UI
                         "such as incorrect Cone AoE angles.\n" +
                         "Usually you don't need to care about any of these customisations.");
                     ImGui.NewLine();
-                    ImGui.TreePush();
+                    ImGui.TreePush("");
                     if (ImGui.Button("Edit Action Blacklist"))
                         actionBlacklistEditUI.OpenUI();
                     // TODO: this is too confusing and useless rn, unless
@@ -203,7 +203,7 @@ namespace ActionEffectRange.UI
 
                     ImGuiExt.SpacedSeparator();
 
-                    ImGui.TreePush();
+                    ImGui.TreePush("");
                     ImGui.Checkbox($"[DEBUG] Log debug info to Dalamud Console", ref Config.LogDebug);
                     ImGui.NewLine();
                     ImGui.Checkbox("Show Sponsor/Support button", ref Config.ShowSponsor);

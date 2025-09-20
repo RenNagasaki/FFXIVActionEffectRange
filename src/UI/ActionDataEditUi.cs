@@ -2,10 +2,10 @@
 using ActionEffectRange.Actions.Data.Template;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System.Collections.Generic;
 using System.Linq;
-using ExcSheets = Lumina.Excel.GeneratedSheets;
+using ExcSheets = Lumina.Excel.Sheets;
 
 namespace ActionEffectRange.UI
 {
@@ -187,10 +187,10 @@ namespace ActionEffectRange.UI
                     ImGui.Text(entry.ActionId.ToString());
                     // Action
                     ImGui.TableNextColumn();
-                    ImGui.Text(excelRow?.Name ?? string.Empty);
+                    ImGui.Text(excelRow?.Name.ToString() ?? string.Empty);
                     // ClassJob
                     ImGui.TableNextColumn();
-                    ImGui.Text(excelRow?.ClassJob.Value?.Name ?? string.Empty);
+                    ImGui.Text(excelRow?.ClassJob.Value.ToString() ?? string.Empty);
                     // Custom fields
                     foreach (var col in editDataColumns)
                     {

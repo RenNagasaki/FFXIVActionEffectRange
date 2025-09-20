@@ -1,5 +1,5 @@
 ﻿using ActionEffectRange.Actions.EffectRange;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System.Numerics;
 
 namespace ActionEffectRange.Drawing.Workers

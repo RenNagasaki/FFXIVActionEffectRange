@@ -5,8 +5,6 @@ using ActionEffectRange.Actions.Enums;
 using Lumina.Excel;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using GeneratedSheets = Lumina.Excel.GeneratedSheets;
-
 
 namespace ActionEffectRange.Actions.Data
 {
@@ -21,13 +19,13 @@ namespace ActionEffectRange.Actions.Data
 
         #region Data sheet related
 
-        internal static readonly ExcelSheet<GeneratedSheets.Action>? ActionExcelSheet
-            = DataManager.GetExcelSheet<GeneratedSheets.Action>();
+        internal static readonly ExcelSheet<Lumina.Excel.Sheets.Action>? ActionExcelSheet
+            = DataManager.GetExcelSheet<Lumina.Excel.Sheets.Action>();
 
-        internal static readonly ExcelSheet<GeneratedSheets.ActionCategory>? ActionCategoryExcelSheet
-            = DataManager.GetExcelSheet<GeneratedSheets.ActionCategory>();
+        internal static readonly ExcelSheet<Lumina.Excel.Sheets.ActionCategory>? ActionCategoryExcelSheet
+            = DataManager.GetExcelSheet<Lumina.Excel.Sheets.ActionCategory>();
 
-        public static GeneratedSheets.Action? GetActionExcelRow(uint actionId)
+        public static Lumina.Excel.Sheets.Action? GetActionExcelRow(uint actionId)
             => ActionExcelSheet?.GetRow(actionId);
 
         // Unk46 seems related to actions being harmful/beneficial:
@@ -39,8 +37,8 @@ namespace ActionEffectRange.Actions.Data
         // But grounded attacking AoE (salted earth, doton etc.) are all 2,
         // Celetial Opposition(pve) is 1 (probably a legacy design where it used to stun enemies?)
         public static ActionHarmfulness GetActionHarmfulness(
-            GeneratedSheets.Action actionRow)
-            => actionRow.Unknown46 switch
+            Lumina.Excel.Sheets.Action actionRow)
+            => actionRow.Unknown4 switch
             {
                 1 => ActionHarmfulness.Harmful,
                 2 => ActionHarmfulness.Beneficial,
@@ -54,15 +52,15 @@ namespace ActionEffectRange.Actions.Data
         // ** Meanwhile, actions from Eureka / Resistance items have ClassJobCategory>1
         // ** =0 ones are actions by enemies, Trust or quest battle NPCs, etc.
         // ** But PvP additional effect actions (e.g. #29706) may also have 0 here
-        public static bool IsPlayerTriggeredAction(GeneratedSheets.Action actionRow)
-            => actionRow.ClassJobCategory.Row > 0 || actionRow.IsPvP;
+        public static bool IsPlayerTriggeredAction(Lumina.Excel.Sheets.Action actionRow)
+            => actionRow.ClassJobCategory.RowId > 0 || actionRow.IsPvP;
 
-        public static bool IsPlayerCombatAction(GeneratedSheets.Action actionRow)
+        public static bool IsPlayerCombatAction(Lumina.Excel.Sheets.Action actionRow)
             => IsPlayerTriggeredAction(actionRow)
-            && IsCombatActionCategory((ActionCategory)actionRow.ActionCategory.Row);
+            && IsCombatActionCategory((ActionCategory)actionRow.ActionCategory.RowId);
 
         public static ActionCategory GetActionCategory(uint actionId)
-            => (ActionCategory)(GetActionExcelRow(actionId)?.ActionCategory.Row ?? 0);
+            => (ActionCategory)(GetActionExcelRow(actionId)?.ActionCategory.RowId ?? 0);
 
         public static bool IsCombatActionCategory(ActionCategory actionCategory)
             => actionCategory is ActionCategory.Ability or ActionCategory.AR
@@ -72,8 +70,7 @@ namespace ActionEffectRange.Actions.Data
             => actionCategory is ActionCategory.Special or ActionCategory.Artillery;
 
         public static string GetActionCategoryName(ActionCategory actionCategory)
-            => ActionCategoryExcelSheet?.GetRow((uint)actionCategory)?.Name ?? string.Empty;
-
+            => ActionCategoryExcelSheet?.GetRowOrDefault((uint)actionCategory)?.Name.ToString() ?? string.Empty;
         #endregion
 
         #region Customisation data managing 
@@ -135,8 +132,8 @@ namespace ActionEffectRange.Actions.Data
         {
             var row1 = GetActionExcelRow(primaryActionId);
             var row2 = GetActionExcelRow(secondaryActionId);
-            if (row1 == null || row2 == null || !IsPlayerTriggeredAction(row1)
-                || !IsPlayerTriggeredAction(row2)) return false;
+            if (row1 == null || row2 == null || !IsPlayerTriggeredAction(row1.Value)
+                || !IsPlayerTriggeredAction(row2.Value)) return false;
 
             if (primaryActionId == secondaryActionId) return true;
             if (AdditionalEffectsMap.Dictionary.TryGetValue(primaryActionId,
@@ -144,7 +141,7 @@ namespace ActionEffectRange.Actions.Data
                 return true;
 
             // Case: Action with same name => possibly one is an additional effect of the other
-            if (row1.Name.RawString == row2.Name.RawString) return true;
+            if (row1.Value.Name.ToString() == row2.Value.Name.ToString()) return true;
 
             // Case: Known pet/pet-like action
             // ** Not used so not checked

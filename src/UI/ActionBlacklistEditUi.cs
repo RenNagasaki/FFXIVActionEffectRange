@@ -2,7 +2,7 @@
 using ActionEffectRange.Actions.Data.Template;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace ActionEffectRange.UI
 {
@@ -48,11 +48,11 @@ namespace ActionEffectRange.UI
                 ImGui.Text($"Add this action to Blacklist?");
                 ImGui.Indent();
                 ImGui.Text(ActionDataInterfacing.GetActionDescription(
-                    selectedMatchedActionRow));
+                    selectedMatchedActionRow.Value));
                 ImGui.Unindent();
                 if (ImGuiExt.IconButton(1, FontAwesomeIcon.Plus, "Add to Blacklist"))
                 {
-                    ActionData.AddToActionBlacklist(selectedMatchedActionRow.RowId);
+                    ActionData.AddToActionBlacklist(selectedMatchedActionRow.Value.RowId);
                     ClearEditInput();
                 }
                 ImGui.SameLine();

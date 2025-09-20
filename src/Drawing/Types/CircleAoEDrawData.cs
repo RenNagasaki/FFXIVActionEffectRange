@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using Dalamud.Bindings.ImGui;
+using FFXIVClientStructs.FFXIV.Client.Game.Control;
 
 namespace ActionEffectRange.Drawing.Types
 {
@@ -15,7 +16,7 @@ namespace ActionEffectRange.Drawing.Types
             Radius = baseEffectRange + xAxisModifier;
         }
 
-        public override void Draw(ImDrawListPtr drawList)
+        public override unsafe void Draw(ImDrawListPtr drawList)
         {
             if (Config.LargeDrawOpt == 1 && Radius >= Config.LargeThreshold) 
                 return;  // no draw large
@@ -24,19 +25,13 @@ namespace ActionEffectRange.Drawing.Types
             var seg = 2 * MathF.PI / Config.NumSegments;
             for (int i = 0; i < Config.NumSegments; i++)
             {
-                Projection.WorldToScreen(
-                    new(Centre.X + Radius * MathF.Sin(i * seg),
-                        Centre.Y,
-                        Centre.Z + Radius * MathF.Cos(i * seg)),
-                    out var p, out var pr);
+                camera.WorldToScreen(new(
+                    Centre.X + Radius * MathF.Sin(i * seg),
+                    Centre.Y,
+                    Centre.Z + Radius * MathF.Cos(i * seg)), out var p);
 
-                // Dont add points that may be projected to weird positions
-                if (pr.Z < -.1f) points[i] = new(float.NaN, float.NaN);
-                else 
-                {
-                    points[i] = p;
-                    drawList.PathLineTo(p);
-                }
+                points[i] = p;
+                drawList.PathLineTo(p);
             }
 
             if (Config.Filled 

@@ -5,15 +5,15 @@
         public static bool IsPlayerLoaded 
             => ClientState.LocalContentId != 0 && ClientState.LocalPlayer != null;
 
-        public static Dalamud.Game.ClientState.Objects.SubKinds.PlayerCharacter?
+        public static Dalamud.Game.ClientState.Objects.SubKinds.IPlayerCharacter?
             LocalPlayer => ClientState.LocalPlayer;
 
         public static bool IsPvPZone
-            => DataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.TerritoryType>()?
-                .GetRow(ClientState.TerritoryType)?.IsPvpZone ?? false;
+            => DataManager.GetExcelSheet<Lumina.Excel.Sheets.TerritoryType>()
+                .GetRow(ClientState.TerritoryType).IsPvpZone;
 
         public const uint InvalidGameObjectId
-            = Dalamud.Game.ClientState.Objects.Types.GameObject.InvalidGameObjectId;
+            = 0xE0000000;
 
     }
 }

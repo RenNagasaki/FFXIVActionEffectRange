@@ -9,7 +9,7 @@ namespace ActionEffectRange.Helpers
         public delegate void OnClassJobChangedDelegate(uint currentClassJob);
         public static event OnClassJobChangedDelegate ClassJobChanged = delegate { };
 
-        public static uint CurrentClassJobId => LocalPlayer?.ClassJob.Id ?? 0;
+        public static uint CurrentClassJobId => LocalPlayer?.ClassJob.Value.RowId ?? 0;
 
         public static bool IsCurrentClassJobACNRelated()
             => CurrentClassJobId == 26  // ACN

@@ -18,8 +18,8 @@ namespace ActionEffectRange.Actions.EffectRange
         }
 
         public DonutAoEEffectRangeData(
-            Lumina.Excel.GeneratedSheets.Action actionRow, byte innerRadius = 0)
-            : this(actionRow.RowId, actionRow.ActionCategory.Row, actionRow.TargetArea,
+            Lumina.Excel.Sheets.Action actionRow, byte innerRadius = 0)
+            : this(actionRow.RowId, actionRow.ActionCategory.RowId, actionRow.TargetArea,
                   ActionData.GetActionHarmfulness(actionRow), actionRow.Range,
                   actionRow.EffectRange, actionRow.XAxisModifier, actionRow.CastType,
                   innerRadius, isOriginal: true)

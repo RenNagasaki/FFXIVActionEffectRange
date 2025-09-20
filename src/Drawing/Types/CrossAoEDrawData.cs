@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using Dalamud.Bindings.ImGui;
+using FFXIVClientStructs.FFXIV.Client.Game.Control;
 
 namespace ActionEffectRange.Drawing.Types
 {
@@ -40,19 +41,19 @@ namespace ActionEffectRange.Drawing.Types
             CrossEnd2 = CalcFarEndWorldPos(target, -CrossDirection, Length);
         }
 
-        public override void Draw(ImDrawListPtr drawList)
+        public override unsafe void Draw(ImDrawListPtr drawList)
         {
 #if DEBUG
-            Projection.WorldToScreen(End, out var pe, out _);
+            camera.WorldToScreen(End, out var pe);
             drawList.AddCircleFilled(pe, Config.Thickness * 2, 
                 RingColour);
-            Projection.WorldToScreen(End2, out var pe2, out _);
+            camera.WorldToScreen(End2, out var pe2);
             drawList.AddCircleFilled(pe2, Config.Thickness * 2, 
                 ImGui.ColorConvertFloat4ToU32(new(0,0,1,1)));
-            Projection.WorldToScreen(CrossEnd, out var pc, out _);
+            camera.WorldToScreen(CrossEnd, out var pc);
             drawList.AddCircleFilled(pc, Config.Thickness * 2, 
                 ImGui.ColorConvertFloat4ToU32(new(1, 0, 0, 1)));
-            Projection.WorldToScreen(CrossEnd2, out var pc2, out _);
+            camera.WorldToScreen(CrossEnd2, out var pc2);
             drawList.AddCircleFilled(pc2, Config.Thickness * 2, 
                 ImGui.ColorConvertFloat4ToU32(new(1, 1, 0, 1)));
 #endif

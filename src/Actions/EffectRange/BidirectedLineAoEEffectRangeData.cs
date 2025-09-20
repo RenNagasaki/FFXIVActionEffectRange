@@ -1,6 +1,5 @@
 ﻿using ActionEffectRange.Actions.Data;
 using ActionEffectRange.Actions.Enums;
-
 namespace ActionEffectRange.Actions.EffectRange
 {
     public class LineAoEEffectRangeData : EffectRangeData
@@ -18,9 +17,9 @@ namespace ActionEffectRange.Actions.EffectRange
             RotationOffset = rotationOffset;
         }
 
-        public LineAoEEffectRangeData(Lumina.Excel.GeneratedSheets.Action actionRow,
+        public LineAoEEffectRangeData(Lumina.Excel.Sheets.Action actionRow,
             float rotationOffset = 0)
-            : this(actionRow.RowId, actionRow.ActionCategory.Row, actionRow.TargetArea,
+            : this(actionRow.RowId, actionRow.ActionCategory.RowId, actionRow.TargetArea,
                   ActionData.GetActionHarmfulness(actionRow), actionRow.Range, 
                   actionRow.EffectRange, actionRow.XAxisModifier, actionRow.CastType, 
                   rotationOffset, isOriginal: true)

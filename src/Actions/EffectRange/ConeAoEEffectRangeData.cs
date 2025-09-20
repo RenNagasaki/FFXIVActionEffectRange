@@ -20,9 +20,9 @@ namespace ActionEffectRange.Actions.EffectRange
             RotationOffset = rotationOffset;
         }
 
-        public ConeAoEEffectRangeData(Lumina.Excel.GeneratedSheets.Action actionRow,
+        public ConeAoEEffectRangeData(Lumina.Excel.Sheets.Action actionRow,
             float centralAngleCycles = 0, float rotationOffset = 0)
-            : this(actionRow.RowId, actionRow.ActionCategory.Row, actionRow.TargetArea,
+            : this(actionRow.RowId, actionRow.ActionCategory.RowId, actionRow.TargetArea,
                   ActionData.GetActionHarmfulness(actionRow), actionRow.Range,
                   actionRow.EffectRange, actionRow.XAxisModifier, actionRow.CastType,
                   centralAngleCycles, rotationOffset, isOriginal: true)

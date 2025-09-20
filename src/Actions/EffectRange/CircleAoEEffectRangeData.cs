@@ -13,8 +13,8 @@ namespace ActionEffectRange.Actions.EffectRange
                   range, effectRange, xAxisModifier, castType, isOriginal)
         { }
 
-        public CircleAoEEffectRangeData(Lumina.Excel.GeneratedSheets.Action actionRow)
-            : this(actionRow.RowId, actionRow.ActionCategory.Row, actionRow.TargetArea,
+        public CircleAoEEffectRangeData(Lumina.Excel.Sheets.Action actionRow)
+            : this(actionRow.RowId, actionRow.ActionCategory.RowId, actionRow.TargetArea,
                   ActionData.GetActionHarmfulness(actionRow), actionRow.Range,
                   actionRow.EffectRange, actionRow.XAxisModifier,
                   actionRow.CastType, isOriginal: true)

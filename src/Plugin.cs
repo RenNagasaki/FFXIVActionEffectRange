@@ -20,7 +20,7 @@ namespace ActionEffectRange
     public class Plugin : IDalamudPlugin
     {
         [PluginService]
-        internal static DalamudPluginInterface PluginInterface { get; private set; } = null!;
+        internal static IDalamudPluginInterface PluginInterface { get; private set; } = null!;
         [PluginService]
         internal static ICommandManager CommandManager { get; private set; } = null!;
         [PluginService]
@@ -40,7 +40,6 @@ namespace ActionEffectRange
         [PluginService]
         internal static IPluginLog PluginLog { get; private set; } = null!;
         
-
         public string Name => "ActionEffectRange"
 #if DEBUG
             + " [DEV]";
@@ -79,17 +78,37 @@ namespace ActionEffectRange
         internal static Configuration Config = null!;
         internal static bool InConfig = false;
 
-        public Plugin()
+        public Plugin(
+            IDalamudPluginInterface pluginInterface,
+            IPluginLog log,
+            ICommandManager commandManager,
+            IFramework framework,
+            IClientState clientState,
+            IObjectTable objectTable,
+            IDataManager dataManager,
+            ISigScanner sigScanner,
+            IGameInteropProvider gameInteropProvider,
+            IBuddyList buddyList)
         {
-            Config = PluginInterface.GetPluginConfig() as Configuration 
-                ?? new Configuration();
+            PluginInterface = pluginInterface;
+            CommandManager = commandManager;
+            DataManager = dataManager;
+            SigScanner = sigScanner;
+            InteropProvider = gameInteropProvider;
+            Framework = framework;
+            ClientState = clientState;
+            ObejctTable = objectTable;
+            BuddyList = buddyList;
+            PluginLog = log;
+            Config = pluginInterface.GetPluginConfig() as Configuration 
+                   ?? new Configuration();
 
             InitializeCommands();
 
-            PluginInterface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
-            PluginInterface.UiBuilder.Draw += ConfigUi.Draw;
+            pluginInterface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
+            pluginInterface.UiBuilder.Draw += ConfigUi.Draw;
 
-            PluginInterface.UiBuilder.Draw += EffectRangeDrawing.OnTick;
+            pluginInterface.UiBuilder.Draw += EffectRangeDrawing.OnTick;
 
             ClientState.Logout += OnLogOut;
             ClientState.TerritoryChanged += CheckTerritory;
@@ -126,7 +145,7 @@ namespace ActionEffectRange
             }
         }
 
-        private static void OnLogOut()
+        private static void OnLogOut(int type, int code)
         {
             EffectRangeDrawing.Reset();
         }

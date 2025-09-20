@@ -1,4 +1,6 @@
-﻿using ImGuiNET;
+﻿using Dalamud.Bindings.ImGui;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
+using CameraManager = FFXIVClientStructs.FFXIV.Client.Game.Control.CameraManager;
 
 namespace ActionEffectRange.Drawing
 {
@@ -6,9 +8,11 @@ namespace ActionEffectRange.Drawing
     {
         public readonly uint RingColour;
         public readonly uint FillColour;
+        internal Camera camera;
 
-        public DrawData(uint ringColour, uint fillColour)
+        public unsafe DrawData(uint ringColour, uint fillColour)
         {
+            camera = CameraManager.Instance()->GetActiveCamera()->CameraBase.SceneCamera;
             RingColour = ringColour;
             FillColour = fillColour;
         }
@@ -66,26 +70,22 @@ namespace ActionEffectRange.Drawing
 
         #region DrawComponent
 
-        protected void DrawRect(ImDrawListPtr drawList, float width, 
+        protected unsafe void DrawRect(ImDrawListPtr drawList, float width, 
             Vector3 nearEndWorldPos, Vector3 farEndWorldPos, Vector3 direction)
         {
 #if DEBUG
-            Projection.WorldToScreen(farEndWorldPos, out var pe, out var per);
+            camera.WorldToScreen(farEndWorldPos, out var pe);
             drawList.AddCircleFilled(pe, Config.Thickness * 2, RingColour);
 #endif
 
             var w2 = width / 2;
             var (p1w, p2w, p3w, p4w) = CalcRectCornersWorldPos(
                 nearEndWorldPos, farEndWorldPos, direction, w2);
-
-            Projection.WorldToScreen(p1w, out var p1s, out var p1r);
-            Projection.WorldToScreen(p2w, out var p2s, out var p2r);
-            Projection.WorldToScreen(p3w, out var p3s, out var p3r);
-            Projection.WorldToScreen(p4w, out var p4s, out var p4r);
-
-            // don't draw the whole range if some of the points
-            // may be projected to a weird position
-            if (p1r.Z < -1 || p2r.Z < -1 || p3r.Z < -1 || p4r.Z < -1) return;
+            
+            camera.WorldToScreen(p1w, out var p1s);
+            camera.WorldToScreen(p2w, out var p2s);
+            camera.WorldToScreen(p3w, out var p3s);
+            camera.WorldToScreen(p4w, out var p4s);
 
             if (Config.Filled)
                 drawList.AddQuadFilled(p1s, p2s, p3s, p4s, FillColour);
