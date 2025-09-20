@@ -30,6 +30,7 @@
     <Content Include="ActionEffectRange.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="README.md" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties actioneffectrange_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>

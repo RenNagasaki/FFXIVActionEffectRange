@@ -14,7 +14,7 @@ such as where has the action landed and how large an area it covered.
 > Any contribution (PRs/issues) is still welcome.
 -->
 
-
+ 
 ## How to Install
 
 [XIVLauncher](https://github.com/goatcorp/FFXIVQuickLauncher) is required to install and run the plugin.
