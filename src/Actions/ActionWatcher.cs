@@ -6,6 +6,7 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using Vector3Struct = FFXIVClientStructs.FFXIV.Common.Math.Vector3;
@@ -95,24 +96,21 @@ namespace ActionEffectRange.Actions
             }
         }
 
-        private delegate byte UseActionLocationDelegate(IntPtr actionManager, 
-            byte actionType, uint actionId, long targetObjectId, IntPtr location, uint param);
-        private static readonly Hook<UseActionLocationDelegate>? UseActionLocationHook;
-        private static byte UseActionLocationDetour(IntPtr actionManager, 
-            byte actionType, uint actionId, long targetObjectId, IntPtr location, uint param)
+        private static readonly Hook<ActionManager.Delegates.UseActionLocation>? UseActionLocationHook;
+        
+        private static unsafe bool UseActionLocationDetour(ActionManager* actionManager, ActionType actionType, uint actionId, ulong targetObjectId, Vector3* location, uint param, byte a7)
         {
             var ret = UseActionLocationHook!.Original(actionManager, 
-                actionType, actionId, targetObjectId, location, param);
+                actionType, actionId, targetObjectId, location, param, a7);
             try
             {
 #if DEBUG
                 PluginLog.Debug($"** UseActionLocation: actionType={actionType}, " +
                     $"actionId={actionId}, targetId={targetObjectId:X}, " +
-                    $"loc={location:X} " +
-                    $"=> {(Vector3)Marshal.PtrToStructure<Vector3Struct>(location)} " +
+                    $"loc={*location} " +
                     $"param={param}; ret={ret}");
 #endif
-                if (ret == 0) return ret;
+                if (!ret) return ret;
 
                 var seq = ActionManagerHelper.CurrentSeq;
 
@@ -160,13 +158,11 @@ namespace ActionEffectRange.Actions
         // useType == 0 when queued;
         // If queued action not executed immediately,
         //  useType == 1 when this function is called later to actually execute the action
-        private delegate byte UseActionDelegate(IntPtr actionManager, 
-            byte actionType, uint actionId, long targetObjectId, uint param, uint useType, int pvp, IntPtr a8);
-        private static readonly Hook<UseActionDelegate>? UseActionHook;
+        private static readonly Hook<ActionManager.Delegates.UseAction>? UseActionHook;
         // Detour used mainly for processing draw-when-casting
         // When applicable, drawing is triggered immediately
-        private static byte UseActionDetour(IntPtr actionManager, 
-            byte actionType, uint actionId, long targetObjectId, uint param, uint useType, int pvp, IntPtr a8)
+        
+        private static unsafe bool UseActionDetour(ActionManager* actionManager, ActionType actionType, uint actionId, ulong targetObjectId, uint param, ActionManager.UseActionMode useType, uint pvp, bool* a8)
         {
             var ret = UseActionHook!.Original(actionManager, 
                 actionType, actionId, targetObjectId, param, useType, pvp, a8);
@@ -176,7 +172,7 @@ namespace ActionEffectRange.Actions
                 LogUserDebug($"UseAction => actionType={actionType}, " +
                     $"actionId={actionId}, targetId={targetObjectId:X}");
 #if DEBUG
-                PluginLog.Debug($"** UseAction: param={param}, useType={useType}, pvp={pvp}, a8={a8:X}; " +
+                PluginLog.Debug($"** UseAction: param={param}, useType={useType}, pvp={pvp}, a8={*a8}; " +
                     $"ret={ret}; CurrentSeq={ActionManagerHelper.CurrentSeq}");
 #endif
                 if (!DrawWhenCasting) return ret;
@@ -187,7 +183,7 @@ namespace ActionEffectRange.Actions
                     return ret;
                 }
 
-                if (ret == 0)
+                if (!ret)
                 {
                     LogUserDebug($"---Skip: not drawing on useType={useType} && ret={ret}");
                     return ret;
@@ -519,6 +515,26 @@ namespace ActionEffectRange.Actions
         private static bool ShouldProcessActionType(uint actionType) 
             => actionType == 0x1 || actionType == 0xE; // pve 0x1, pvp 0xE
 
+        private static bool ShouldProcessAction(ActionType actionType, uint actionId)
+        {
+            if (!IsPlayerLoaded)
+            {
+                LogUserDebug($"---Skip: PC not loaded");
+                return false;
+            }
+            if (!ShouldProcessActionType(actionType) 
+                || !ShouldProcessAction(actionId))
+            {
+                LogUserDebug($"---Skip: Not processing " +
+                             $"action#{actionId}, ActionType={actionType}");
+                return false;
+            }
+            return true;
+        }
+
+        private static bool ShouldProcessActionType(ActionType actionType) 
+            => actionType == ActionType.Action || actionType == ActionType.PvPAction; // pve 0x1, pvp 0xE
+
         private static bool ShouldProcessAction(uint actionId)
             => !ActionData.IsActionBlacklisted(actionId);
 
@@ -607,10 +623,10 @@ namespace ActionEffectRange.Actions
 
         static unsafe ActionWatcher()
         {
-            UseActionHook ??= InteropProvider.HookFromAddress<UseActionDelegate>(
-                ActionManagerHelper.FpUseAction, UseActionDetour);
-            UseActionLocationHook ??= InteropProvider.HookFromAddress<UseActionLocationDelegate>(
-                ActionManagerHelper.FpUseActionLocation, UseActionLocationDetour);
+            UseActionHook ??= InteropProvider.HookFromAddress<ActionManager.Delegates.UseAction>(
+                ActionManager.Addresses.UseAction.Value, UseActionDetour);
+            UseActionLocationHook ??= InteropProvider.HookFromAddress<ActionManager.Delegates.UseActionLocation>(
+                ActionManager.Addresses.UseActionLocation.Value, UseActionLocationDetour);
             
             ReceiveActionEffectHook = Plugin.InteropProvider.HookFromAddress<ActionEffectHandler.Delegates.Receive>(
                 ActionEffectHandler.MemberFunctionPointers.Receive, ReceiveActionEffectDetour
