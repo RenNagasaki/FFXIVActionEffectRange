@@ -14,8 +14,8 @@ namespace ActionEffectRange.Helpers
         public static IGameObject? GetPet()
             => BuddyList.PetBuddy?.GameObject;
 
-        public static ulong GetPetObjectId()
-            => GetPet()?.GameObjectId ?? 0;
+        public static ulong GetPetEntityId()
+            => GetPet()?.EntityId ?? 0;
 
         public static Vector3 GetPetPosition()
             => GetPet()?.Position ?? new();
@@ -54,7 +54,7 @@ namespace ActionEffectRange.Helpers
             && !ClassJobWatcher.IsCurrentClassJobACNRelated();
 
         public static bool IsCurrentPet(uint objectId)
-            => GetPetObjectId() == objectId;
+            => GetPetEntityId() == objectId;
 
     }
 }

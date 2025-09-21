@@ -5,38 +5,33 @@ namespace ActionEffectRange.Helpers
 {
     internal unsafe static class ActionManagerHelper
     {
-        private static readonly IntPtr actionMgrPtr;
+        private static readonly ActionManager* ActionMgrPtr;
 
-        internal static IntPtr FpUseAction => 
-            (IntPtr)ActionManager.MemberFunctionPointers.UseAction;
-        internal static IntPtr FpUseActionLocation => 
-            (IntPtr)ActionManager.MemberFunctionPointers.UseActionLocation;
+        public static ushort CurrentSeq => ActionMgrPtr != null
+            ? ActionMgrPtr->LastUsedActionSequence : (ushort)0;
+        public static ushort LastRecievedSeq => ActionMgrPtr != null
+            ? ActionMgrPtr->LastHandledActionSequence : (ushort)0;
 
-        public static ushort CurrentSeq => actionMgrPtr != IntPtr.Zero
-            ? (ushort)Marshal.ReadInt16(actionMgrPtr + 0x110) : (ushort)0;
-        public static ushort LastRecievedSeq => actionMgrPtr != IntPtr.Zero
-            ? (ushort)Marshal.ReadInt16(actionMgrPtr + 0x112) : (ushort)0;
-
-        public static bool IsCasting => actionMgrPtr != IntPtr.Zero
-            && Marshal.ReadByte(actionMgrPtr + 0x28) != 0; 
-        public static uint CastingActionId => actionMgrPtr != IntPtr.Zero
-            ? (uint)Marshal.ReadInt32(actionMgrPtr + 0x24) : 0u;
-        public static uint CastTargetObjectId => actionMgrPtr != IntPtr.Zero
-            ? (uint)Marshal.ReadInt32(actionMgrPtr + 0x38) : 0u;
-        public static float CastTargetPosX => actionMgrPtr != IntPtr.Zero
-            ? Interop.MarshalFloat(actionMgrPtr + 0x40) : 0f;
-        public static float CastTargetPosY => actionMgrPtr != IntPtr.Zero
-            ? Interop.MarshalFloat(actionMgrPtr + 0x44) : 0f;
-        public static float CastTargetPosZ => actionMgrPtr != IntPtr.Zero
-            ? Interop.MarshalFloat(actionMgrPtr + 0x48) : 0f;
-        // The player rotation when casting
-        public static float CastRotation => actionMgrPtr != IntPtr.Zero
-            ? Interop.MarshalFloat(actionMgrPtr + 0x50) : 0f;
+        public static bool IsCasting => ActionMgrPtr != null
+            && ActionMgrPtr->CastActionType != 0; 
+        public static uint CastActionId => ActionMgrPtr != null
+            ? ActionMgrPtr->CastActionId : 0u;
+        public static ulong CastTargetObjectId => ActionMgrPtr != null
+            ? ActionMgrPtr->CastTargetId.Id : 0u;
+        public static float CastTargetPosX => ActionMgrPtr != null
+            ? ActionMgrPtr->CastTargetPosition.X : 0f;
+        public static float CastTargetPosY => ActionMgrPtr != null
+            ? ActionMgrPtr->CastTargetPosition.Y : 0f;
+        public static float CastTargetPosZ => ActionMgrPtr != null
+            ? ActionMgrPtr->CastTargetPosition.Z : 0f;
+        // The player rotation when castings
+        public static float CastRotation => ActionMgrPtr != null
+            ? ActionMgrPtr->CastRotation : 0f;
         
         static ActionManagerHelper()
         {
-            actionMgrPtr = (IntPtr)ActionManager.Instance();
-            if (actionMgrPtr == IntPtr.Zero)
+            ActionMgrPtr = ActionManager.Instance();
+            if (ActionMgrPtr == null)
                 PluginLog.Warning("Ptr to ActionManager is 0");
         }
     }

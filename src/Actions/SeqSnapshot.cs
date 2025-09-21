@@ -39,7 +39,7 @@ namespace ActionEffectRange.Actions
         public SeqSnapshot(ushort seq, ulong targetObjId, Vector3 targetPos)
             : this(seq, LocalPlayer?.Position ?? new(), LocalPlayer?.Rotation ?? 0,
                   targetObjId, targetPos,
-                  PetWatcher.GetPetObjectId(),
+                  PetWatcher.GetPetEntityId(),
                   PetWatcher.GetPetPosition(),
                   PetWatcher.GetPetRotation())
         { }

@@ -69,7 +69,7 @@ namespace ActionEffectRange.Actions
                     LogUserDebug($"---Skip: Invalid target #{targetObjectId}");
                     return;
                 }
-                else if (targetObjectId == LocalPlayer!.TargetObjectId)
+                else if (targetObjectId == LocalPlayer!.EntityId)
                 {
                     var snapshot = new SeqSnapshot(sequence);
                     playerActionSeqs.Add(new(actionId, snapshot, false));
@@ -170,9 +170,9 @@ namespace ActionEffectRange.Actions
             try
             {
                 LogUserDebug($"UseAction => actionType={actionType}, " +
-                    $"actionId={actionId}, targetId={targetObjectId:X}");
+                    $"actionId={actionId}, targetId={targetObjectId}");
 #if DEBUG
-                PluginLog.Debug($"** UseAction: param={param}, useType={useType}, pvp={pvp}, a8={*a8}; " +
+                PluginLog.Debug($"** UseAction: param={param}, useType={useType}, pvp={pvp}; " +
                     $"ret={ret}; CurrentSeq={ActionManagerHelper.CurrentSeq}");
 #endif
                 if (!DrawWhenCasting) return ret;
@@ -189,7 +189,7 @@ namespace ActionEffectRange.Actions
                     return ret;
                 }
 
-                var castActionId = ActionManagerHelper.CastingActionId;
+                var castActionId = ActionManagerHelper.CastActionId;
 
                 if (!ShouldProcessAction(actionType, castActionId))
                     return ret;
@@ -202,7 +202,6 @@ namespace ActionEffectRange.Actions
                 foreach (var a in actionIdsToDraw)
                 {
                     var erdata = EffectRangeDataManager.NewData(a);
-
                     if (erdata == null)
                     {
                         PluginLog.Error($"Cannot get data for action#{a}");
@@ -273,8 +272,6 @@ namespace ActionEffectRange.Actions
         }
 
         
-        private delegate void ReceiveActionEffectDelegate(ulong sourceObjectId, IntPtr sourceActor, 
-            IntPtr position, IntPtr effectHeader, IntPtr effectArray, IntPtr effectTrail);
         private static readonly Hook<ActionEffectHandler.Delegates.Receive>? ReceiveActionEffectHook;
         
         //private static void ReceiveActionEffectDetour(ulong sourceObjectId, IntPtr sourceActor, IntPtr position, IntPtr effectHeader, IntPtr effectArray, IntPtr effectTrail)
@@ -293,7 +290,7 @@ namespace ActionEffectRange.Actions
 #endif
 
                 LogUserDebug($"ReceiveActionEffect => " +
-                    $"source={casterEntityId:X}, target={header->AnimationTargetId:X}, " +
+                    $"source={casterEntityId:X}, target={header->AnimationTargetId.ObjectId:X}, " +
                     $"action={header->ActionId}, seq={header->SourceSequence}");
 #if DEBUG
                 PluginLog.Debug($"** ---effectHeader: target={header->AnimationTargetId:X}, " +
@@ -317,9 +314,9 @@ namespace ActionEffectRange.Actions
                     return;
                 }
 
-                if (casterEntityId != LocalPlayer!.GameObjectId
+                if (casterEntityId != LocalPlayer!.EntityId
                     && (!PetWatcher.HasPetPresent 
-                        || PetWatcher.GetPetObjectId() != casterEntityId))
+                        || PetWatcher.GetPetEntityId() != casterEntityId))
                 {
                     LogUserDebug($"---Skip: Effect triggered by others");
                     return;
@@ -348,7 +345,7 @@ namespace ActionEffectRange.Actions
                 var mainSeq = header->SourceSequence > 0
                         ? header->SourceSequence : lastReceivedMainSeq;
 
-                if (casterEntityId == LocalPlayer!.GameObjectId)
+                if (casterEntityId == LocalPlayer!.EntityId)
                 {
                     // Source is pc
 
@@ -368,9 +365,9 @@ namespace ActionEffectRange.Actions
                         // Additional effect may have different target (e.g. self vs targeted enemy)
                         Vector3 trgtPos = erdata.IsGTAction
                             ? *targetPos
-                            : (header->AnimationTargetId == LocalPlayer.TargetObjectId
-                                ? seqInfo.SeqSnapshot.PlayerPosition
-                                : seqInfo.SeqSnapshot.TargetPosition);
+                            : (header->AnimationTargetId.Id == LocalPlayer.TargetObjectId
+                                ? seqInfo.SeqSnapshot.TargetPosition
+                                : seqInfo.SeqSnapshot.PlayerPosition);
 
                         LogUserDebug($"---Adding DrawData for action #{header->ActionId} " +
                             $"from player, using SeqSnapshot#{seqInfo.Seq}");
@@ -391,11 +388,11 @@ namespace ActionEffectRange.Actions
                         else
                         {
                             IGameObject? target = null;
-                            if (header->AnimationTargetId == casterEntityId) // Self-targeting
+                            if (header->AnimationTargetId.ObjectId == casterEntityId) // Self-targeting
                                 target = LocalPlayer;
-                            else if (header->AnimationTargetId != 0
-                                && header->AnimationTargetId != InvalidGameObjectId)
-                                target = ObejctTable.SearchById((uint)header->AnimationTargetId);
+                            else if (header->AnimationTargetId.ObjectId != 0
+                                && header->AnimationTargetId.ObjectId != InvalidGameObjectId)
+                                target = ObejctTable.SearchById(header->AnimationTargetId.ObjectId);
 
                             if (target != null)
                             {
@@ -403,7 +400,7 @@ namespace ActionEffectRange.Actions
                                     DrawTrigger.Used, erdata, LocalPlayer!.Position,
                                     target.Position, LocalPlayer!.Rotation);
                             }
-                            else LogUserDebug($"---Failed: Target #{header->AnimationTargetId:X} not found");
+                            else LogUserDebug($"---Failed: Target #{header->AnimationTargetId.Id:X} not found");
                         }
                     }
                     else LogUserDebug($"---Skip: Not drawing for auto-triggered action #{header->ActionId}");
@@ -425,7 +422,7 @@ namespace ActionEffectRange.Actions
                     // Not very common as the game already defers removing pet objects
                     //  possibly to account for delays
                     if (PetWatcher.HasPetPresent
-                        && PetWatcher.GetPetObjectId() == casterEntityId)
+                        && PetWatcher.GetPetEntityId() == casterEntityId)
                     {
                         if (PetWatcher.IsCurrentPetACNPet() && !Config.DrawACNPets)
                         {
@@ -628,7 +625,7 @@ namespace ActionEffectRange.Actions
             UseActionLocationHook ??= InteropProvider.HookFromAddress<ActionManager.Delegates.UseActionLocation>(
                 ActionManager.Addresses.UseActionLocation.Value, UseActionLocationDetour);
             
-            ReceiveActionEffectHook = Plugin.InteropProvider.HookFromAddress<ActionEffectHandler.Delegates.Receive>(
+            ReceiveActionEffectHook = InteropProvider.HookFromAddress<ActionEffectHandler.Delegates.Receive>(
                 ActionEffectHandler.MemberFunctionPointers.Receive, ReceiveActionEffectDetour
             );
             SendActionHook ??= InteropProvider.HookFromAddress<SendActionDelegate>(
