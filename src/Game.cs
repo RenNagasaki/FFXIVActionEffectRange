@@ -9,8 +9,8 @@
             LocalPlayer => ClientState.LocalPlayer;
 
         public static bool IsPvPZone
-            => DataManager.GetExcelSheet<Lumina.Excel.Sheets.TerritoryType>()
-                .GetRow(ClientState.TerritoryType).IsPvpZone;
+            => ClientState.TerritoryType > 0 && (DataManager.GetExcelSheet<Lumina.Excel.Sheets.TerritoryType>()?
+                .GetRow(ClientState.TerritoryType).IsPvpZone ?? false);
 
         public const uint InvalidGameObjectId
             = 0xE0000000;
