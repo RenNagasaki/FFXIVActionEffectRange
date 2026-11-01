@@ -1,0 +1,13 @@
+NO LICENSE - ALL RIGHTS RESERVED BY THE RESPECTIVE AUTHORS
+
+This repository is a fork of https://github.com/yomishino/FFXIVActionEffectRange (author: yomishino).
+The upstream project was published without any license. Under copyright law
+this means all rights remain with its original authors; no permission to use,
+copy, modify or redistribute the upstream code is granted by this repository.
+
+This file exists only to state that fact explicitly. It does not grant any
+license, and it does not relicense the upstream code.
+
+Changes made in this fork by Julian Katzwinkel (RenNagasaki) are offered under
+the same terms as the upstream code. If the upstream authors add a license,
+those changes may be used under that license as well.
